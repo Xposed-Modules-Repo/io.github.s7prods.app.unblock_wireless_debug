@@ -1,7 +1,9 @@
-# Wireless Debug Unblocker（LSPosed 模块）
+# ADB Wireless Debug Unblocker（LSPosed 模块）
 
-允许在**未连接无线局域网（Wi-Fi）**时打开 Android 16 / API 36 的「无线调试（ADB over Wi-Fi）」。
+允许在**未连接无线局域网（Wi-Fi）**时打开 Android 的「无线调试（ADB over Wi-Fi）」开关。
 同时挂钩 **Settings 应用**与 **system_server** 两层，绕过「必须已连 Wi-Fi」的软件门槛。
+
+此模块功能为允许打开此开关而不是（通过设置 adb tcpip 端口等方式）自动打开此开关；用户手动启用开关后体验与原生无线调试无异，支持 mTLS、mDNS 等所有特性。
 
 源码拦截点的完整审计见 [AUDIT.md](./AUDIT.md)。
 
@@ -51,8 +53,7 @@ WirelessDebugUnblocker/
 
 1. LSPosed 管理器 → 模块 → 启用 **Wireless Debug Unblocker**。
 2. 作用域勾选（本模块已在清单里声明，管理器一般会自动带出；若手动选择）：
-   - **系统框架 / System（system_server）** —— 对应 legacy 包名 `android`/`system`。
-     > 注意：不要只选名为「Android 系统 / android」的系统 UI 进程，那样 system_server 钩子不会注入，模块看似启用却无效。
+   - **系统框架** —— 对应 legacy 包名 `android`。
    - **设置 / com.android.settings**
 3. **重启设备**（system_server 钩子必须重启后生效）。
 
@@ -64,10 +65,10 @@ WirelessDebugUnblocker/
 ## 边界与免责
 
 - 本模块只移除「必须已连 Wi-Fi」的**软件门槛**，不会凭空创建网络。
-- 真正 `adb pair` / `adb connect` 仍需一条可达的二层网络：已连 Wi-Fi、本机热点、以太网，或 USB 反向网络共享。完全离线时开关可开、页面可进，但无法配对/连接。
+- 真正 `adb pair` / `adb connect` 仍需网络：已连 Wi-Fi、本机热点、流量（无需打开热点）、以太网，或 USB 反向网络共享。完全离线时开关可开、页面可进，但无法配对/连接。
 - 仅用于个人设备调试与学习；自行承担使用风险。
 
 ## 兼容性
 
-- 目标 AOSP API 36（Android 16）。钩子全部按「方法名 + 存在性匹配」实现，ROM 微调签名时自动跳过并记日志，不会导致系统崩溃；个别厂商改包名/类名时对应层静默失效，可据 `WDBlocker` 日志调整。
-- minSdk 26（Android 8.0），运行依赖 LSPosed 经典 Xposed API（api 82）。
+- 目前已在目标 AOSP API 36（Android 16）上测试。钩子全部按「方法名 + 存在性匹配」实现，ROM 微调签名时自动跳过并记日志，不会导致系统崩溃；个别厂商改包名/类名时对应层静默失效，可据 `WDBlocker` 日志调整。
+- minSdk Android 11
